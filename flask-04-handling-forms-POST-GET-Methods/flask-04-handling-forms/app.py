@@ -30,7 +30,7 @@ def login():
     if request.method == 'POST':
         user_name = request.form['username']
         password = request.form['password']
-        if password == 'michael':
+        if password == 'michaelScott':
             return render_template('secure.html', user=user_name.title())
         else:
             return render_template('login.html', user=user_name.title(), control = True)
