@@ -10,16 +10,17 @@ Description: |
   anywhere. Kittens Carousel Static Website
   is downloaded from my Public Github repository,
   then deployed on Apache Web Server.
-Parameters:
-  
-Metadata:
-  
-Mappings:
-  
-Conditions:
-  
+
 Resources:
-  
-Transform:
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP for Apache Web Server and SSH for secure connection.
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
   
 Outputs:
