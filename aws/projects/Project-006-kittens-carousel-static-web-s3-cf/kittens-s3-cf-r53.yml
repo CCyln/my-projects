@@ -6,10 +6,12 @@ Parameters:
   DomainName:
     Description: DNS Name of existing Amazon Route 53 hosted zone ex. kittens.com
     Type: AWS::Route53::HostedZone::Id
+
   KittensDomainName:
     Description: Full domain name for the App. ex. cute.kittens.com
     Type: String
     AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
+
 Resources:
   KittensBucket:
     Type: AWS::S3::Bucket
@@ -18,7 +20,7 @@ Resources:
       BucketName: !Ref KittensDomainName
       WebsiteConfiguration: 
         IndexDocument: index.html
-   KittensBucketPolicy:
+  KittensBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref KittensBucket
@@ -30,7 +32,7 @@ Resources:
             Action: s3:GetObject
             Resource: !Join ['', ['arn:aws:s3:::', !Ref 'KittensBucket', /*]]
   
-    KittensCertificate:
+  KittensCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
       CertificateTransparencyLoggingPreference: ENABLED
@@ -39,7 +41,8 @@ Resources:
         - DomainName: !Ref KittensDomainName
           HostedZoneId: !Ref DomainName
       ValidationMethod: DNS
-    KittensCloudfront:
+  
+  KittensCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
@@ -69,4 +72,26 @@ Resources:
         ViewerCertificate:
           AcmCertificateArn: !Ref KittensCertificate
           SslSupportMethod: sni-only      
+
+  KittensRecordSet:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref DomainName
+      RecordSets: 
+        - Name: !Ref KittensDomainName
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt KittensCloudfront.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+
+
 Outputs:
+  BucketName: 
+    Description: S3 Bucket URL for Kittens Website
+    Value: !GetAtt KittensBucket.WebsiteURL
+  CloudfrontEndpoint:
+    Description: Endpoint for Kittens Cloudfront
+    Value: !GetAtt KittensCloudfront.DomainName
+  FullDomainName:
+    Description: Full Domain Name of my Application
+    Value: !Ref KittensDomainName
